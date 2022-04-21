@@ -6,6 +6,7 @@ Template repository for npm package
 - 👁️public npm package
 - auto publish with github workflow
 - rollup
+- (optional) for react
 
 # setup
 
