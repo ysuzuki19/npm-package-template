@@ -1,25 +1,11 @@
 import typescript from '@rollup/plugin-typescript';
-import dts from 'rollup-plugin-dts';
+import { dts } from 'rollup-plugin-dts';
 import babel from '@rollup/plugin-babel';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
-const entry = './index.ts';
-
-const es_config = {
-  input: entry,
-  output: {
-    file: 'dist/index.es.js',
-    format: 'es',
-  },
-  // external: ['react'],
-  plugins: [
-    typescript(),
-    babel({
-      babelHelpers: 'bundled',
-      extensions: ['.ts'],
-    }),
-  ],
-};
+const entry = 'lib/index.tsx';
 
 const dts_config = {
   input: entry,
@@ -30,26 +16,45 @@ const dts_config = {
   plugins: [dts()],
 };
 
+const plugins_for_build = [
+  resolve(),
+  commonjs(),
+  typescript(),
+  babel({
+    babelHelpers: 'bundled',
+    extensions: ['.ts'],
+    exclude: 'node_modules/**',
+  }),
+];
+
+const external = ['react', 'react-dom'];
+
+const es_config = {
+  input: entry,
+  output: {
+    file: 'dist/index.es.jsx',
+    format: 'es',
+  },
+  external,
+  plugins: plugins_for_build,
+};
+
 const umd_config = {
   input: entry,
   output: {
-    file: 'dist/index.umd.min.js',
+    file: 'dist/index.umd.min.jsx',
     format: 'umd',
-    name: 'LibraryName',
+    name: 'QrCodeReader',
     exports: 'named',
     indent: false,
-    // globals: { react: 'react' },
+    globals: {
+      react: 'react',
+    },
   },
-  // external: ['react'],
-  plugins: [
-    typescript(),
-    babel({
-      babelHelpers: 'bundled',
-      extensions: ['.ts'],
-      exclude: 'node_modules/**',
-    }),
-    terser(),
-  ],
+  external,
+  plugins: [...plugins_for_build, terser()],
 };
 
-export default [es_config, dts_config, umd_config];
+const configs = [es_config, dts_config, umd_config];
+
+export default configs;
